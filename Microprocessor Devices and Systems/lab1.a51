@@ -1,7 +1,7 @@
-; var 16 
-; F = ^(X v ^Y & ^Z)
-; razhraushiy  - H
-; podtverchie  - H
+;Вариант 16
+;F = ^(X v ^Y & ^Z)
+;Сигнал разрешения - высокий
+;Сигнал потверждения - высокий
 
 ORG 0000h
 	BEGIN: MOV 00h, #60d
