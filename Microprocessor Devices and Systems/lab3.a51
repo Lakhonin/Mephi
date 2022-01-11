@@ -1,130 +1,142 @@
-BUFF equ 21H
-
-ORG 0H
-AJMP START
-ORG 13H
-AJMP SUBR1
-ORG 1BH
-AJMP SUBR2
-ORG 30H
-
-START:
-MOV IE,#00001100b
-MOV IP,#00001000b
-
-MOV TCON,#0
-SETB EA
-
-
-CYCLE_TI:
+RG   0H
+	AJMP INIT
+		ORG   13H  
+		AJMP   SUBR1
+		ORG   1Bh   	
+		AJMP  SUBR2
+		ORG   30H
+		INIT:
 MOV DPH,#80H
 MOV DPL,#00H
-MOV 0C0h,#0
 
-MOVX A,@DPTR
-MOV R5,#2
-MOV R7,#4
-ACALL CYCLE
+MOV     A,#10000111b
+MOVX    @DPTR,  A
+INC     DPTR       
+MOV     A,      #11000100b	
+MOVX    @DPTR,  A
+INC     DPTR
+MOV     A,      #10110011b		
+MOVX    @DPTR,  A
+INC     DPTR
+MOV     A,      #11110111b
+MOVX    @DPTR,  A
 
-M1:
-INC DPTR ;2
-MOV R5,#2 ;1
-MOVX A,@DPTR ;2
-AJMP CYCLE ; 2
+MOV R6,#04h 
+MOV B,R6
+MOV 0c0h, #00000000B
+MOV	IE,#00001100B
+MOV	IP,#00001000b
+MOV	TMOD, #10000000b	;
+MOV	TCON,#01000100b 		
+SETB EA
 
-M2:
-SWAP A ;1
-MOV R6,A ;1
+START: 	
+MOV DPH, #80h
+MOV DPL, #00h
+MOV R6,B
 
-CYCLE:
-ACALL FUNC ;2
-ACALL SEND ;2
-ACALL CHECK ;2
-MOV A,R6 ;1
+CYCLE:	
+clr 0c0h.6 	
+clr 0c0h.7  
+movx A, @dptr
+mov R5, A
+anl A, #0f0h 
+acall calc
+acall write
+ACALL T_mal
+ACALL T_bol		
+clr 0c0h.6 	 
+setb 0c0h.7  
+mov A, R5
+anl A, #0fh		
+swap A       		
+acall calc   
+acall write  
+ACALL T_mal	 	;t
+ACALL T_bol 	;T
+cjne r6,#1,count		
+AJMP START
+
+COUNT:	
+INC DPTR				
+djnz r6, cycle
+
+CALC:			
+rlc A 			
+mov 00,C
+rlc A			
+mov 01,C
+rlc A			
+mov 02,C		
+rlc A			
+mov 03,C	
+MOV C, 0C0h.0				
+ANL C, /0C0h.1				
+ORL C, /0C0h.2
+CPL C
+jnb 03, false_check	
+jc done				    
+
+fail:                           
+setb 0c0h.6           
+cpl 25h.3
+
+done:                       		              
+rlc A							
+ret				
+		
+false_check:               
+jnc done		   
+jmp fail           
+
+WRITE: 	   
+ANL A, #00001111b				
+ANL 0c0h, #11110000b			
+orl 0c0h,A					
+ret
+
+T_mal:
 MOV R2,#5 ;2
 DELAY:
 ;650/2=325;325/5=65; 65-(16/5)=62
-MOV R3,#62 ;2*R3*R2
+MOV R3,#63 ;2*R3*R2
 DJNZ R3,$
 DJNZ R2,DELAY
-MOV 0C0h,#00000000b
-;710-650=60
-MOV R4,#14 ;1
-DJNZ R4,$ ;(60-31)/2=14
-DJNZ R5,M2 ;2
-DJNZ R7,M1
-;AJMP M1
-AJMP CYCLE_TI ;2
+MOV 0c0h,#00000000b
+RET
 
-SUBR1:
-ACALL UPDATE
-RETI
+T_bol:
+		MOV    R4,#14     	
+		DJNZ   R4,$				
+		RET		
+
+prav:
+ANL	A,#01111111B
+MOVX @DPTR, A      
+jmp	OUT1
+
+SUBR1: 								
+MOVX A,@DPTR
+jnb 0c0h.7, prav  		
+ANL	A,#11110111B  
+MOVX @DPTR, A
+		
+OUT1:  	RETI
+
+prav1:
+ANL	A,#01111111B
+ORL	A,#10000000B   
+MOVX @DPTR, A       
+jmp OUT2          
 
 SUBR2:
-ACALL UPDATE_t
+MOVX A,@DPTR
+jnb 0c0h.7, prav1      
+ANL	A,#11110111B
+ORL	A,#00001000B   
+MOVX @DPTR, A
+			
+OUT2: clr ri
+clr ti
 RETI
-
-UPDATE:
-DJNZ R5,M3
-MOV BUFF,A
-SETB BUFF.0
-MOV A, BUFF
-SWAP A 
-MOVX @DPTR,A
-INC R5
-RET
-
-M3:
-MOV BUFF,A
-SETB BUFF.0
-MOV A,BUFF
-MOVX @DPTR,A
-INC R5
-RET
-
-UPDATE_t:
-DJNZ R5,M4
-MOV BUFF,A
-CLR BUFF.0
-MOV A, BUFF
-SWAP A 
-MOVX @DPTR,A
-INC R5
-RET
-
-M4:
-MOV BUFF,A
-CLR BUFF.0
-MOV A,BUFF
-MOVX @DPTR,A
-INC R5
-RET
-
-FUNC:
-MOV BUFF,A ;1
-MOV R6,A ;1
-MOV C,BUFF.3 ;1
-ORL C,/BUFF.2 ;2
-ANL C,/BUFF.1 ;2
-CPL C ;2
-MOV BUFF.0,C ;1
-RET ;2
-
-CHECK:
-XRL A,BUFF ;1
-CLR 0C0h.6 ;1
-JZ CHECKED ;2
-SETB 0C0h.6 ;1
-RET ;2
-
-CHECKED:
-RET ;2
-
-SEND:
-MOV A,R6 ;1
-ANL A,#00001111b ;2
-MOV 0C0h,A ;1
-MOV A,R6 ;1
-RET ;2
-
 END
