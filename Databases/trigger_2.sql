@@ -4,6 +4,9 @@
 -- обязательное использование курсора (планы)
 -- в E13 добавить атрибут "дата"
 
+CREATE TRIGGER 
+
+/*
 CREATE TRIGGER e17_insert
 ON Заказы_у_отдела_продаж_E17
 AFTER INSERT AS
@@ -26,3 +29,4 @@ END
 ClOSE Personal_crsr
 DEALLOCATE Personal_crsr
 END
+*/
