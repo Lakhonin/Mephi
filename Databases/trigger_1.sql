@@ -1,7 +1,7 @@
 -- Триггер 1 
 -- при создании заявки  E15, изменяется количество издания в E3
 
-CREATE TRIGGER E15_INSERT_UPDATE
+CREATE TRIGGER triger1
 ON Заказ_в_акте_приема_E15
 WITH EXECUTE AS CALLER
 AFTER INSERT
