@@ -3,4 +3,5 @@
 -- создаем заявки, если есть невыполненые заказы, создаем E14 и E17
 
 
-CREATE PROCEDURE creat_e14
+CREATE PROCEDURE proc1
+
