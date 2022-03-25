@@ -94,14 +94,14 @@ CREATE TABLE Планы_издательств_E11
 (
 id_plans_publishing integer NOT NULL PRIMARY KEY,
 id_employee integer NOT NULL FOREIGN KEY REFERENCES Сотрудник_E10(id_employee) ON DELETE NO ACTION,
-id_publishing integer NOT NULL FOREIGN KEY REFERENCES Издательство_E1(id_publishing) ON DELETE NO ACTION,
-date_plans date NOT NULL
+id_publishing integer NOT NULL FOREIGN KEY REFERENCES Издательство_E1(id_publishing) ON DELETE NO ACTION
 );
 CREATE TABLE Издаваемая_литература_E13
 (
 id_publication integer NOT NULL,
 id_plans_publishing integer NOT NULL, 
 count_publication integer NULL CHECK (count_publication >0),
+date_plans date NOT NULL,
 PRIMARY KEY(id_publication,id_plans_publishing),
 FOREIGN KEY (id_publication) REFERENCES Издание_E3(id_publication) ON DELETE NO ACTION,
 FOREIGN KEY (id_plans_publishing) REFERENCES Планы_издательств_E11(id_plans_publishing) ON DELETE NO ACTION
