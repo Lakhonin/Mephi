@@ -8,9 +8,13 @@
 -- 6. дата изменения
 
 select 
-case when (a.id_publishing = LAG(a.id_publishing) OVER(ORDER BY a.id_publishing,a.id_publication,b.date_operation) and a.id_publication = LAG(a.id_publication) OVER(ORDER BY a.id_publishing,a.id_publication,b.date_operation)
-) then '0' else '1' end first,
-*
+a.title_publishing 'Название издательства',
+a.title_publication 'Названия издания',
+coalesce(sum(b.count_publication) over (partition by a.id_publishing,a.id_publication order by a.id_publishing,a.id_publication,b.date_operation 
+			rows between unbounded preceding and current row), 0) 'Кол-во изданий на складе',
+b.count_publication 'Изменение кол-ва',
+b.type_operation 'Тип операции',
+b.date_operation 'Дата операции'
 from (
 		select e3.id_publication, e3.title title_publication, e1.title title_publishing, e3.count_publication,e13.date_plans, e1.id_publishing
 		from Издательство_E1 e1
