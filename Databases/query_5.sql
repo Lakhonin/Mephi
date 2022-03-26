@@ -20,9 +20,8 @@ select e8.id_chair, max(e8.date_task) date_last_task, count(e8.id_task) count_ta
 left join Заявки_в_заказе_E14 e14 on e14.id_task = e8.id_task
 left join (select count(e14.id_publication) top_publication, e14.id_publication from Заявки_в_заказе_E14 e14
 		group by e14.id_publication) a on a.id_publication = e14.id_publication
-where a.id_publication in (select top 2 b.id_publication from (select count(e14.id_publication) top_publication, e14.id_publication from Заявки_в_заказе_E14 e14
-														group by e14.id_publication) as b
-							group by b.id_publication)
+where a.top_publication in (select max(b.top_publication) max_top_publication from (select count(e14.id_publication) top_publication, e14.id_publication from Заявки_в_заказе_E14 e14
+														group by e14.id_publication) as b)
 group by e8.id_chair) c on c.id_chair = e7.id_chair
 where c.count_task is not null
 order by c.count_task desc
