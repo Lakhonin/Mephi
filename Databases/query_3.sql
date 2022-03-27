@@ -6,8 +6,9 @@
 -- 3. количество актов списания
 -- 4. количество заказов в этом квартале
 
-
-select 
+select * from (
+select * from
+(select 
 d.quarter_year 'Квартал',
 sum(d.count_act_reception) 'Кол-во актов приема',
 sum(d.count_act_debiting) 'Кол-во актов списания',
@@ -28,4 +29,13 @@ union
 		where a.year_date_registration = year(GETDATE())-1
 	group by a.quarter_year
 	) d
-group by d.quarter_year
+group by d.quarter_year) res
+unpivot (a for [Показатель] in ([Кол-во актов приема], [Кол-во актов списания], [Кол-во заказов])) as unpvt
+) as unpivotTABLE
+pivot
+(
+	max(a)
+	for [Квартал] in ([1],[2],[3],[4])
+) pvt 
+
+
