@@ -23,7 +23,7 @@ else begin /*state OK*/
 	declare @id_task int
 	declare @id_purchase_order int
 	declare @date_now date = (select getdate())
-	declare @msg varchar(100) = 'Издание с таким ИД в БД отсутсвует. Error code = 1'
+	declare @msg varchar(100) = 'Ошибка: Издание с таким ИД в БД отсутсвует. Error code = 1'
 	while (@pos != 0)
 		begin
 			set @id_publication = SUBSTRING(@values, 1, @pos-1)
@@ -34,19 +34,26 @@ else begin /*state OK*/
 			set @pos = charindex(@delimeter,@values)
 			if exists (select e3.id_publication from Издание_E3 e3 where e3.id_publication = @id_publication)
 				begin
-					set @id_task = (select max(id_task) + 1 from Заявка_E8)
-					insert into Заявка_E8(id_chair,id_employee,id_task,date_task)
-					values (@p_id_chair,@p_id_employee,@id_task,@date_now);
-					print 'E8: Запись <Заявка> вставлена. Error code = 0'
+					if(@count_publication !=0)
+						begin
+							set @id_task = (select max(id_task) + 1 from Заявка_E8)
+							insert into Заявка_E8(id_chair,id_employee,id_task,date_task)
+							values (@p_id_chair,@p_id_employee,@id_task,@date_now);
+							print 'E8: Запись <Заявка> вставлена. Error code = 0'
 
-					/*set @id_purchase_order = (select c.id_purchase_order from (
-					select top 1 a.count_publication - b.count_publication ost_count_pub, a.id_purchase_order from (select e14.count_publication, e14.id_publication,e14.id_purchase_order from Заявки_в_заказе_E14 e14)a
-					left join (select e15.count_publication ,e15.id_publication,e15.id_purchase_order from Заказ_в_акте_приема_E15 e15) b on b.id_purchase_order = a.id_purchase_order
-					order by ost_count_pub desc) c)*/
-					set @id_purchase_order = (select top 1 e4.id_purchase_order from Заказы_у_отдела_продаж_E17 e17 right join Заказ_на_приобретение_литературы_E4 e4 on e4.id_purchase_order = e17.id_purchase_order where e17.id_purchase_order is null)
-					insert into Заявки_в_заказе_E14(id_task,id_purchase_order,id_publication,count_publication)
-					values (@id_task,@id_purchase_order,@id_publication,@count_publication)
-					print 'E14: Запись <Заявки в заказе> вставлена. Error code = 0'
+							/*set @id_purchase_order = (select c.id_purchase_order from (
+							select top 1 a.count_publication - b.count_publication ost_count_pub, a.id_purchase_order from (select e14.count_publication, e14.id_publication,e14.id_purchase_order from Заявки_в_заказе_E14 e14)a
+							left join (select e15.count_publication ,e15.id_publication,e15.id_purchase_order from Заказ_в_акте_приема_E15 e15) b on b.id_purchase_order = a.id_purchase_order
+							order by ost_count_pub desc) c)*/
+							set @id_purchase_order = (select top 1 e4.id_purchase_order from Заказы_у_отдела_продаж_E17 e17 right join Заказ_на_приобретение_литературы_E4 e4 on e4.id_purchase_order = e17.id_purchase_order where e17.id_purchase_order is null)
+							insert into Заявки_в_заказе_E14(id_task,id_purchase_order,id_publication,count_publication)
+							values (@id_task,@id_purchase_order,@id_publication,@count_publication)
+							print 'E14: Запись <Заявки в заказе> вставлена. Error code = 0'
+						end
+					else
+						begin
+							print 'Ошибка: Нулевое количество издания. Error code = 1'
+						end
 				end
 			else
 				begin
@@ -58,7 +65,7 @@ end /*state 1*/
 end /*proc */
 
 exec proc1 2,3,'2 3 25 54 6 7 2 5 4 7 5 3'
-exec proc1 2,3,'1 45'
+exec proc1 2,3,'2 4 4'
 					
 /*declare @count_publication int = 7
 select top 1 a.count_publication - b.count_publication ost_count_pub, a.id_purchase_order from (select e14.count_publication, e14.id_publication,e14.id_purchase_order from Заявки_в_заказе_E14 e14)a
