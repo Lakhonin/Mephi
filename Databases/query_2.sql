@@ -12,7 +12,6 @@ with months as(
 		select month_id + 1 from months where month_id < 12
 		)
  select 
- --months.month_id
  case months.month_id when 1 then 'Январь'when 2 then 'Февраль' when 3 then 'Март'when 4 then 'Апрель'when 5 then 'Май' when 6 then 'Июнь' when 7 then 'Июль' when 8 then 'Август' when 9 then 'Сентябрь' when 10 then 'Октябрь' when 11 then 'Ноябрь' when 12 then 'Декабрь' end Месяц,
  case when b.count_task is null then '0' else b.count_task end 'Кол-во заявок',
  case when a.count_pub_reception is not null then a.count_pub_reception else '0' end 'Кол-во принятых изданий',
