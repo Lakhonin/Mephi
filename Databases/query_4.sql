@@ -13,7 +13,7 @@ a.title_publishing 'Название издательства',
 a.title_publication 'Названия издания',
 coalesce(sum(b.count_publication) over (partition by a.id_publishing,a.id_publication order by a.id_publishing,a.id_publication,b.date_operation 
 			rows between unbounded preceding and current row), 0) 'Кол-во изданий на складе',
-b.count_publication 'Изменение кол-ва',
+case when b.type_operation = '-' then -b.count_publication else b.count_publication end 'Изменение кол-ва',
 b.type_operation 'Тип операции',
 b.date_operation 'Дата операции'
 from (
