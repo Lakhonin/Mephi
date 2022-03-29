@@ -25,7 +25,7 @@ id_publication integer NOT NULL PRIMARY KEY,
 id_author integer NOT NULL FOREIGN KEY REFERENCES Автор_E2(id_author) ON DELETE NO ACTION,
 title varchar(20) NOT NULL,
 number_pages integer NOT NULL CHECK (number_pages >0),
-year_publication date NOT NULL CHECK (year_publication LIKE '[0-9][0-9][0-9][0-9]'),
+year_publication date NOT NULL,
 annotation text NULL, 
 count_publication integer NULL CHECK (count_publication >=0)
 );
