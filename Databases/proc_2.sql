@@ -1,3 +1,9 @@
+-- Процедура 2
+ -- Передаем id издания, количество издания, тип операции, id сотрудника
+ -- тип операции:
+ -- 1. прием ( акт приема, заказ). При поступлении выбираем заказы с минимальным количеством изданий в заказе среди остальных
+ -- 2. списание (акт списания)
+
 create procedure proc2 
 @p_id_publication integer, @p_count_publication integer, @p_type integer, @p_id_employee integer AS
 begin /*proc */
