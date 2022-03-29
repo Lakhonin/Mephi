@@ -8,8 +8,14 @@
 -- 5. ФИО сотрудника оформившего больше документов в месяц
 
 
-
-select * from (
+select * 
+from(
+select 
+ *,
+coalesce(sum(a.count_pub) over (partition by a.ch,a.year_date,a.month_date order by a.ch,a.year_date,a.month_date), 0) count_pub_month,
+coalesce(count(a.employee) over (partition by a.employee,a.year_date,a.month_date order by a.employee,a.year_date,a.month_date), 0) count_employee_month,
+coalesce(count(a.task) over (partition by a.ch,a.year_date,a.month_date order by a.ch,a.year_date,a.month_date), 0) count_task_month
+from (
 				select e8.id_task task, datepart(month, e8.date_task) month_date, year(e8.date_task) year_date, e8.id_employee employee,0 count_pub, 1 ch from Заявка_E8 e8
 				
 	
@@ -19,13 +25,8 @@ select * from (
 				
 	union 
 				select 0 task,datepart(month,e4.date_registration) month_date, datepart(year,e4.date_registration) year_date,e4.id_employee employee,0 count_pub,4 ch from Заказ_на_приобретение_литературы_E4 e4
-		)a
-	where a.year_date = (select year(getdate())-1)
-		
-				
 	union 
-							
-	
-
-	select 0 task, datepart(month, e6.date_debiting) month_date,year(e6.date_debiting) year_date, e6.id_employee employee, 12.count_publication count_pub, 3 ch from Акт_списания_E6 e6
-				left join Списанная_литература_E12 e12 on e12.id_act_debiting = e6.id_act_debiting
+				select 0 task, datepart(month,e6.date_debiting) month_date, year(e6.date_debiting) year_date, e6.id_employee employee,e12.count_publication count_pub, 3 ch from Акт_списания_E6 e6 left join Списанная_литература_E12 e12 on e12.id_act_debiting =e6.id_act_debiting
+		)a
+where a.year_date = (select year(getdate())-1)
+)	
